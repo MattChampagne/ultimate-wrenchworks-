@@ -9,6 +9,12 @@ const allowedServiceTypes = new Set([
   'Other'
 ]);
 
+const allowedTimeframes = new Set([
+  'Morning 9-12',
+  'Afternoon 12-4',
+  'Evening 6-8'
+]);
+
 function clean(value, maxLength) {
   return String(value ?? '').trim().slice(0, maxLength);
 }
@@ -17,7 +23,6 @@ export async function POST(request) {
   try {
     const body = await request.json();
 
-    // Honeypot for simple bot traffic. Real customers never see or fill this field.
     if (clean(body.company, 100)) {
       return Response.json({ ok: true });
     }
@@ -29,6 +34,7 @@ export async function POST(request) {
       service_type: clean(body.serviceType, 60),
       year_make_model: clean(body.vehicle, 160),
       preferred_date: clean(body.date, 10) || null,
+      preferred_timeframe: clean(body.timeframe, 40),
       service_location: clean(body.location, 300),
       problem_description: clean(body.issue, 3000),
       source: 'website_v1'
@@ -39,6 +45,7 @@ export async function POST(request) {
       payload.phone.length < 7 ||
       !allowedServiceTypes.has(payload.service_type) ||
       payload.year_make_model.length < 2 ||
+      !allowedTimeframes.has(payload.preferred_timeframe) ||
       payload.service_location.length < 5 ||
       payload.problem_description.length < 10
     ) {
