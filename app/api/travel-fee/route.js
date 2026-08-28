@@ -1,5 +1,6 @@
 const FREE_MILES = 25;
 const RATE_PER_MILE = 1;
+const SERVICE_BASE_ADDRESS = '787 Lee Rd 23, Auburn, AL 36830';
 
 async function geocode(address) {
   const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=us&q=${encodeURIComponent(address)}`;
@@ -20,16 +21,11 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const destination = String(searchParams.get('address') || '').trim().slice(0, 300);
-    const baseAddress = String(process.env.SERVICE_BASE_ADDRESS || '').trim();
-
-    if (!baseAddress) {
-      return Response.json({ ok: false, configured: false, error: 'Distance calculator is not configured yet.' }, { status: 503 });
-    }
     if (destination.length < 5) {
       return Response.json({ ok: false, error: 'Enter a complete service address.' }, { status: 400 });
     }
 
-    const [base, target] = await Promise.all([geocode(baseAddress), geocode(destination)]);
+    const [base, target] = await Promise.all([geocode(SERVICE_BASE_ADDRESS), geocode(destination)]);
     if (!base || !target) {
       return Response.json({ ok: false, error: 'We could not locate that address. Please enter a full street address, city, state, and ZIP.' }, { status: 422 });
     }
@@ -51,13 +47,7 @@ export async function GET(request) {
     const miles = Math.round((meters / 1609.344) * 10) / 10;
     const travelFee = Math.round(Math.max(0, miles - FREE_MILES) * RATE_PER_MILE * 100) / 100;
 
-    return Response.json({
-      ok: true,
-      miles,
-      freeMiles: FREE_MILES,
-      ratePerMile: RATE_PER_MILE,
-      travelFee
-    });
+    return Response.json({ ok: true, miles, freeMiles: FREE_MILES, ratePerMile: RATE_PER_MILE, travelFee });
   } catch (error) {
     console.error('Travel fee calculation error', error);
     return Response.json({ ok: false, error: 'We could not calculate travel distance right now.' }, { status: 500 });
