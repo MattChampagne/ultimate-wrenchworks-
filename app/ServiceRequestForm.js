@@ -14,7 +14,7 @@ export default function ServiceRequestForm() {
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
     const payload = Object.fromEntries(form.entries());
-    const required = ['name', 'phone', 'serviceType', 'vehicle', 'location', 'issue'];
+    const required = ['name', 'phone', 'serviceType', 'vehicle', 'timeframe', 'location', 'issue'];
     const missing = required.some((key) => !String(payload[key] || '').trim());
 
     if (missing) {
@@ -60,7 +60,8 @@ export default function ServiceRequestForm() {
         <label><span>Service type *</span><select name="serviceType" defaultValue="" required><option value="" disabled>Select one</option><option>ATV / UTV</option><option>Motorcycle / Dirt Bike</option><option>Auto / Light Truck</option><option>Small Engine</option><option>Other</option></select></label>
         <label className="wide"><span>Year / Make / Model *</span><input name="vehicle" placeholder="Example: 2022 Polaris Ranger 1000" required /></label>
         <label><span>Preferred date</span><input name="date" type="date" /></label>
-        <label><span>Service location *</span><input name="location" placeholder="City or address" autoComplete="street-address" required /></label>
+        <label><span>Preferred timeframe *</span><select name="timeframe" defaultValue="" required><option value="" disabled>Select a timeframe</option><option value="Morning 9-12">Morning 9–12</option><option value="Afternoon 12-4">Afternoon 12–4</option><option value="Evening 6-8">Evening 6–8</option></select></label>
+        <label className="wide"><span>Service location *</span><input name="location" placeholder="City or address" autoComplete="street-address" required /></label>
         <label className="wide"><span>What is it doing / what service do you need? *</span><textarea name="issue" rows="5" minLength="10" placeholder="Describe the symptoms, maintenance requested, warning lights, noises, leaks, or anything else that will help us prepare." required /></label>
       </div>
       <label className="hpField" aria-hidden="true">Company<input name="company" tabIndex="-1" autoComplete="off" /></label>
