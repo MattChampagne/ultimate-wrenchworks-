@@ -2,7 +2,8 @@ const SUPABASE_URL = 'https://vxptgfnuxboprwhgcxpd.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Wu0xH_TZ9L5t72BnROPtnw_9eJbG88T';
 
 const allowedServiceTypes = new Set([
-  'ATV / UTV',
+  'ATV',
+  'SXS / UTV',
   'Motorcycle / Dirt Bike',
   'Auto / Light Truck',
   'Small Engine',
