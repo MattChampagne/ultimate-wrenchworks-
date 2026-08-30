@@ -2,7 +2,7 @@ const U='https://vxptgfnuxboprwhgcxpd.supabase.co';
 const K='sb_publishable_Wu0xH_TZ9L5t72BnROPtnw_9eJbG88T';
 const SITE='https://ultimate-wrenchworks-topaz.vercel.app';
 const money=n=>`$${Number(n||0).toFixed(2)}`;
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
 export async function POST(req){
  try{
   const auth=req.headers.get('authorization')||'';
@@ -10,7 +10,7 @@ export async function POST(req){
   const {requestId}=await req.json();
   if(!requestId) return Response.json({error:'Missing request'},{status:400});
   const headers={apikey:K,Authorization:auth,'Content-Type':'application/json'};
-  const staff=await fetch(`${U}/rest/v1/staff_members?select=id&active=eq.true&limit=1`,{headers,cache:'no-store'});
+  const staff=await fetch(`${U}/rest/v1/staff_members?select=user_id&active=eq.true&limit=1`,{headers,cache:'no-store'});
   if(!staff.ok||(await staff.json()).length===0) return Response.json({error:'Unauthorized'},{status:403});
   const [rr,qr]=await Promise.all([
    fetch(`${U}/rest/v1/public_service_requests_v1?id=eq.${encodeURIComponent(requestId)}&select=*`,{headers,cache:'no-store'}),
