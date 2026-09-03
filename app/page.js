@@ -26,7 +26,7 @@ export default function Home() {
             <p className="lead">Mobile repair, diagnostics and maintenance for powersports equipment, passenger vehicles and light trucks — at your home, shop or jobsite.</p>
             <div className="actions"><a className="primary" href="#schedule">▣&nbsp;&nbsp; Schedule Service →</a><a className="secondary" href="#schedule">Get a Quote →</a></div>
           </div>
-          <div className="heroLogoWrap"><img className="heroLogo" src={logoData} alt="Ultimate Wrenchworks" /></div>
+          <div className="heroLogoWrap"><img className="heroLogo" src={logoData} alt="Ultimate Wrenchworks" style={{ clipPath: 'none' }} /></div>
         </div>
       </section>
 
