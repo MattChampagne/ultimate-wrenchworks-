@@ -1,10 +1,10 @@
 import ServiceRequestForm from './ServiceRequestForm';
 
 const services = [
-  ['SXS / UTV', 'Engine, transmission, suspension, electrical and general service.', 'SXS'],
-  ['ATV', 'Routine maintenance, engine repair, brakes, drivetrain and more.', 'ATV'],
-  ['Motorcycle / Dirt Bike', 'Engine work, suspension, tuning, maintenance and repairs.', 'BIKE'],
-  ['Auto / Light Truck', 'Diagnostics, repairs and maintenance for passenger vehicles.', 'AUTO']
+  ['SXS / UTV', 'SXS'],
+  ['ATV', 'ATV'],
+  ['Motorcycle / Dirt Bike', 'BIKE'],
+  ['Auto / Light Truck', 'AUTO']
 ];
 
 export default function Home() {
@@ -37,7 +37,7 @@ export default function Home() {
       <section className="section serviceShowcase" id="services">
         <div className="sectionHeading"><p className="kicker">WHAT WE WORK ON</p><h2>POWERSPORTS TO DAILY DRIVERS.</h2><p>Mobile service designed to keep your machines moving without the hassle of hauling them to a shop.</p></div>
         <div className="grid serviceGrid">
-          {services.map(([title, text, mark])=><article className="card serviceCard" key={title}><div className="serviceMark"><span>{mark}</span></div><h3>{title}</h3><p>{text}</p></article>)}
+          {services.map(([title, mark])=><article className="card serviceCard" key={title}><div className="serviceMark"><span>{mark}</span></div><h3>{title}</h3></article>)}
         </div>
       </section>
 
