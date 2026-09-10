@@ -42,7 +42,6 @@ export default function Home() {
       </section>
 
       <section className="whySection" id="about">
-        <div className="whyVisual"><div className="trailerScene"><span>UW</span><b>MOBILE SERVICE</b><small>Professional repair where your equipment already is.</small></div></div>
         <div className="whyCopy"><p className="kicker">WHY CHOOSE ULTIMATE WRENCHWORKS?</p><h2>LESS HAULING.<br/>MORE RIDING.</h2><div className="whyGrid">
           <div><strong>⌖</strong><span><b>Mobile Service</b><small>We come to your home, shop or jobsite.</small></span></div>
           <div><strong>⚙</strong><span><b>Experienced Technician</b><small>Practical powersports and automotive repair.</small></span></div>
