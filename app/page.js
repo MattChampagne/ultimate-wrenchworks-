@@ -37,7 +37,7 @@ export default function Home() {
       <section className="section serviceShowcase" id="services">
         <div className="sectionHeading"><p className="kicker">WHAT WE WORK ON</p><h2>POWERSPORTS TO DAILY DRIVERS.</h2><p>Mobile service designed to keep your machines moving without the hassle of hauling them to a shop.</p></div>
         <div className="grid serviceGrid">
-          {services.map(([title, text, mark])=><article className="card serviceCard" key={title}><div className="serviceMark"><span>{mark}</span></div><h3>{title}</h3><p>{text}</p><a href="#schedule">Request service →</a></article>)}
+          {services.map(([title, text, mark])=><article className="card serviceCard" key={title}><div className="serviceMark"><span>{mark}</span></div><h3>{title}</h3><p>{text}</p></article>)}
         </div>
       </section>
 
