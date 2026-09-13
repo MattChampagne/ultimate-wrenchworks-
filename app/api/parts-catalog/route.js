@@ -7,7 +7,9 @@ function collectObjects(value,predicate,out=[],depth=0){if(depth>10||value==null
 function firstNumber(obj,names){const raw=findValue(obj,names);const n=Number(raw);return Number.isFinite(n)&&n>0?n:null;}
 function firstText(obj,names){const raw=findValue(obj,names);return raw==null?'':String(raw);}
 async function catalogFetch(path,key){const response=await fetch(`${API_BASE}${path}`,{headers:{Accept:'application/json','x-apiprofile-key':key},cache:'no-store'});const text=await response.text();let data;try{data=JSON.parse(text);}catch{data={message:text};}if(!response.ok){const error=new Error(data?.message||data?.error||`Catalog request failed (${response.status}).`);error.status=response.status;throw error;}return data;}
-function normalizeArticle(item){return{articleId:firstNumber(item,['articleId','article_id','id']),partNumber:firstText(item,['articleNumber','articleNo','article_number','partNumber','part_number','number']),brand:firstText(item,['brandName','brand','supplierName','supplier']),description:firstText(item,['description','articleName','productName','name']),imageUrl:firstText(item,['imageUrl','image','thumbnailUrl','thumbnail']),raw:item};}
+function normalizeArticle(item){return{articleId:firstNumber(item,['articleId','article_id','id']),partNumber:firstText(item,['articleNumber','articleNo','article_number','partNumber','part_number','number']),brand:firstText(item,['brandName','brand','supplierName','supplier']),description:firstText(item,['articleProductName','description','articleName','productName','name']),imageUrl:firstText(item,['s3image','imageUrl','image','thumbnailUrl','thumbnail']),raw:item};}
+function normalizeWords(value){return String(value||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().split(/\s+/).filter(Boolean);}
+function categoryScore(category,query){const name=String(category.name||'').toLowerCase().trim();const q=String(query||'').toLowerCase().trim();if(!name)return 0;if(name===q)return 1000;if(name.includes(q))return 800+q.length;if(q.includes(name))return 500+name.length;const qWords=normalizeWords(q);const nWords=new Set(normalizeWords(name));const overlap=qWords.filter(w=>nWords.has(w)).length;return overlap*100+(overlap===qWords.length&&qWords.length?200:0)-Math.abs(name.length-q.length)/10;}
 
 export async function GET(request){
   const key=process.env.AUTOPARTS_API_KEY;
@@ -28,7 +30,9 @@ export async function GET(request){
 
     const categoryData=await catalogFetch(`/category/search-for-the-commodity-group-tree-by-description/type-id/${typeId}/lang-id/4/search-text/${encodeURIComponent(query)}`,key);
     const categoryObjects=collectObjects(categoryData,obj=>Object.keys(obj).some(k=>['categoryId','categoryID','category_id'].includes(k)));
-    const categories=categoryObjects.map(item=>({categoryId:firstNumber(item,['categoryId','categoryID','category_id']),name:firstText(item,['description','categoryName','name','text'])})).filter(x=>x.categoryId);
+    const categoryMap=new Map();
+    for(const item of categoryObjects){const categoryId=firstNumber(item,['categoryId','categoryID','category_id']);const name=firstText(item,['description','categoryName','name','text']);if(categoryId&&!categoryMap.has(`${categoryId}|${name}`))categoryMap.set(`${categoryId}|${name}`,{categoryId,name});}
+    const categories=[...categoryMap.values()].sort((a,b)=>categoryScore(b,query)-categoryScore(a,query));
     if(!categories.length)return Response.json({ok:true,configured:true,vin,vehicleId,typeId,vehicle:matched,categories:[],parts:[],message:'The VIN matched a catalog vehicle, but no category matched that part search. Try a shorter term such as oil filter, brake pad, bearing, belt, or alternator.'});
 
     const selected=categories[0];
