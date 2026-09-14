@@ -56,7 +56,7 @@ export default function Home() {
       </section>
 
       <section className="schedule" id="schedule"><div className="scheduleIntro"><p className="kicker">READY TO GET ROLLING?</p><h2>REQUEST MOBILE SERVICE.</h2><p>Send your service details below. We’ll review the request and contact you to confirm scheduling.</p></div><ServiceRequestForm /></section>
-      <footer className="customerFooter"><div className="brand customerBrand"><span>UW</span><b>ULTIMATE<br/>WRENCHWORKS</b></div><p>Mobile powersports, auto & small-engine service.</p><p>Serving the Auburn–Opelika area.</p><small>© 2026 Ultimate Wrenchworks LLC. All rights reserved.</small></footer>
+      <footer className="customerFooter"><div className="brand customerBrand"><span>UW</span><b>ULTIMATE<br/>WRENCHWORKS</b></div><p>Mobile powersports, auto & small-engine service.</p><p>Serving the Auburn–Opelika area.</p><p><a href="/privacy">Privacy Policy</a> · <a href="/terms">Terms & Conditions</a></p><small>© 2026 Ultimate Wrenchworks LLC. All rights reserved.</small></footer>
     </main>
   );
 }
