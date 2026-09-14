@@ -57,8 +57,10 @@ export async function POST(req){
   const er=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({from:FROM_EMAIL,to:[r.email],subject:`Ultimate Wrenchworks estimate revision ${revision} — ${r.year_make_model}`,html})});
   const ed=await er.json().catch(()=>({}));
   if(!er.ok){console.error('Resend error',er.status,ed);return Response.json({error:ed.message||'Could not send email'},{status:502});}
-  const textBody=`Ultimate Wrenchworks: Your estimate (Revision ${revision}) has been sent to your email. You can also review and approve it here: ${approveUrl}`;
-  const sms=await sendSms(smsNumber(r.phone),textBody);
+  const textBody=`Ultimate Wrenchworks: Your estimate (Revision ${revision}) has been sent to your email. You can also review and approve it here: ${approveUrl}. Reply STOP to opt out or HELP for help.`;
+  const sms=r.sms_consent===true
+   ? await sendSms(smsNumber(r.phone),textBody)
+   : {ok:false,skipped:true,reason:'Customer has not opted in to SMS'};
   const now=new Date().toISOString();
   const up=await fetch(`${U}/rest/v1/public_request_quotes_v1?id=eq.${q.id}`,{method:'PATCH',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({status:'sent',sent_at:now,updated_at:now})});
   if(!up.ok) return Response.json({error:'Email sent, but quote status could not be updated'},{status:502});
