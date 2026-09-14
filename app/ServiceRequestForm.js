@@ -53,7 +53,36 @@ export default function ServiceRequestForm() {
 
   async function checkTravel(address){const clean=String(address||'').trim();if(clean.length<8){setTravel(null);setTravelStatus('Enter a complete street address, city, state and ZIP.');return null;}setCheckingTravel(true);setTravelStatus('Calculating driving distance…');try{const response=await fetch(`/api/travel-fee?address=${encodeURIComponent(clean)}`,{cache:'no-store'});const data=await response.json();if(!response.ok||!data.ok)throw new Error(data.error||'Unable to calculate distance.');setTravel(data);setTravelStatus('');return data;}catch(error){setTravel(null);setTravelStatus(error.message||'Unable to calculate distance.');return null;}finally{setCheckingTravel(false);}}
 
-  async function handleSubmit(event){event.preventDefault();if(submitting)return;const formElement=event.currentTarget;const form=new FormData(formElement);const payload=Object.fromEntries(form.entries());payload.vehicle=vehicle;payload.serviceNeeded=requestedService;payload.vin=serviceType==='Auto / Light Truck'?vin:'';payload.engineSize=resolvedEngine;if(serviceType==='Auto / Light Truck'&&!vinData){setSuccess(false);setStatus('Please enter and decode the 17-character VIN before submitting.');return;}const required=['name','phone','serviceType','serviceNeeded','vehicle','timeframe','location','issue'];if(required.some(key=>!String(payload[key]||'').trim())){setSuccess(false);setStatus('Please complete all required fields before submitting.');return;}let currentTravel=travel;if(!currentTravel){currentTravel=await checkTravel(payload.location);if(!currentTravel){setSuccess(false);setStatus('Please verify the service address so we can calculate driving distance.');return;}}payload.travelDistanceMiles=currentTravel.miles;payload.travelFee=currentTravel.travelFee??0;setSubmitting(true);setSuccess(false);setStatus('Submitting your service request…');try{const response=await fetch('/api/service-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const result=await response.json();if(!response.ok||!result.ok)throw new Error(result.error||'Unable to submit request.');formElement.reset();resetVehicle();setLocation('');setTravel(null);setSuccess(true);setStatus('Request received. We’ll review the details and contact you to confirm scheduling.');}catch(error){setSuccess(false);setStatus(error.message||'We could not save your request. Please try again.');}finally{setSubmitting(false);}}
+  async function handleSubmit(event){
+    event.preventDefault();
+    if(submitting)return;
+    const formElement=event.currentTarget;
+    const form=new FormData(formElement);
+    const payload=Object.fromEntries(form.entries());
+    payload.vehicle=vehicle;
+    payload.serviceNeeded=requestedService;
+    payload.vin=serviceType==='Auto / Light Truck'?vin:'';
+    payload.engineSize=resolvedEngine;
+    if(serviceType==='Auto / Light Truck'&&!vinData){setSuccess(false);setStatus('Please enter and decode the 17-character VIN before submitting.');return;}
+    const requiredLabels={name:'Name',phone:'Phone',serviceType:'Equipment category',serviceNeeded:'Service needed',vehicle:'Vehicle',timeframe:'Preferred timeframe',location:'Service location',issue:'Additional details'};
+    const missing=Object.keys(requiredLabels).filter(key=>!String(payload[key]||'').trim());
+    if(missing.length){
+      const first=missing[0];
+      setSuccess(false);
+      setStatus(`Please complete: ${missing.map(key=>requiredLabels[key]).join(', ')}.`);
+      const field=formElement.elements.namedItem(first);
+      if(field&&typeof field.focus==='function'){field.focus();field.scrollIntoView?.({behavior:'smooth',block:'center'});}
+      return;
+    }
+    let currentTravel=travel;
+    if(!currentTravel){currentTravel=await checkTravel(payload.location);if(!currentTravel){setSuccess(false);setStatus('Please verify the service address so we can calculate driving distance.');return;}}
+    payload.travelDistanceMiles=currentTravel.miles;
+    payload.travelFee=currentTravel.travelFee??0;
+    setSubmitting(true);setSuccess(false);setStatus('Submitting your service request…');
+    try{const response=await fetch('/api/service-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const result=await response.json();if(!response.ok||!result.ok)throw new Error(result.error||'Unable to submit request.');formElement.reset();resetVehicle();setLocation('');setTravel(null);setSuccess(true);setStatus('Request received. We’ll review the details and contact you to confirm scheduling.');}
+    catch(error){setSuccess(false);setStatus(error.message||'We could not save your request. Please try again.');}
+    finally{setSubmitting(false);}
+  }
 
   return <form className="requestForm" onSubmit={handleSubmit} noValidate><div className="formGrid">
     <label><span>Name *</span><input name="name" autoComplete="name" required /></label><label><span>Phone *</span><input name="phone" type="tel" autoComplete="tel" required /></label><label><span>Email</span><input name="email" type="email" autoComplete="email" /></label>
