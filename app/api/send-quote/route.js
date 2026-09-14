@@ -5,6 +5,31 @@ const FROM_EMAIL=process.env.RESEND_FROM_EMAIL||'Ultimate Wrenchworks <quotes@ul
 const money=n=>`$${Number(n||0).toFixed(2)}`;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const AUTHORIZATION='This estimate is based on the conditions and information known at the time of inspection or diagnosis. The scope of work, parts required, labor time, and total price may change if additional problems or previously unidentified conditions are discovered during service. If additional work or charges are necessary, Ultimate Wrenchworks will provide an updated estimate or authorization request before proceeding. No additional work beyond the approved scope will be performed without the customer’s approval. By approving this estimate, the customer authorizes Ultimate Wrenchworks to perform only the work and charges described in this approved estimate.';
+function smsNumber(value){
+ const raw=String(value||'').trim();
+ const digits=raw.replace(/\D/g,'');
+ if(digits.length===10)return `+1${digits}`;
+ if(digits.length===11&&digits.startsWith('1'))return `+${digits}`;
+ if(raw.startsWith('+')&&digits.length>=8&&digits.length<=15)return `+${digits}`;
+ return '';
+}
+async function sendSms(to,body){
+ const sid=process.env.TWILIO_ACCOUNT_SID;
+ const token=process.env.TWILIO_AUTH_TOKEN;
+ const from=process.env.TWILIO_FROM_NUMBER;
+ if(!sid||!token||!from)return {ok:false,skipped:true,reason:'SMS service is not configured'};
+ if(!to)return {ok:false,skipped:true,reason:'Customer phone number is not SMS-ready'};
+ const auth=Buffer.from(`${sid}:${token}`).toString('base64');
+ const form=new URLSearchParams({To:to,From:from,Body:body});
+ const response=await fetch(`https://api.twilio.com/2010-04-01/Accounts/${encodeURIComponent(sid)}/Messages.json`,{
+  method:'POST',
+  headers:{Authorization:`Basic ${auth}`,'Content-Type':'application/x-www-form-urlencoded'},
+  body:form.toString()
+ });
+ const data=await response.json().catch(()=>({}));
+ if(!response.ok){console.error('Twilio error',response.status,data);return {ok:false,skipped:false,reason:data.message||'Could not send text message'};}
+ return {ok:true,id:data.sid||null};
+}
 export async function POST(req){
  try{
   const auth=req.headers.get('authorization')||'';
@@ -32,9 +57,11 @@ export async function POST(req){
   const er=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({from:FROM_EMAIL,to:[r.email],subject:`Ultimate Wrenchworks estimate revision ${revision} — ${r.year_make_model}`,html})});
   const ed=await er.json().catch(()=>({}));
   if(!er.ok){console.error('Resend error',er.status,ed);return Response.json({error:ed.message||'Could not send email'},{status:502});}
+  const textBody=`Ultimate Wrenchworks: Your estimate (Revision ${revision}) has been sent to your email. You can also review and approve it here: ${approveUrl}`;
+  const sms=await sendSms(smsNumber(r.phone),textBody);
   const now=new Date().toISOString();
   const up=await fetch(`${U}/rest/v1/public_request_quotes_v1?id=eq.${q.id}`,{method:'PATCH',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({status:'sent',sent_at:now,updated_at:now})});
   if(!up.ok) return Response.json({error:'Email sent, but quote status could not be updated'},{status:502});
-  return Response.json({ok:true,id:ed.id||null});
+  return Response.json({ok:true,emailId:ed.id||null,smsSent:sms.ok,smsId:sms.id||null,smsNote:sms.ok?null:sms.reason||'Text message not sent'});
  }catch(e){console.error(e);return Response.json({error:'Could not send quote'},{status:500});}
 }
