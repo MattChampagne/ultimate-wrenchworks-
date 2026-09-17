@@ -10,10 +10,15 @@ function checkDigit(v){let sum=0;for(let i=0;i<17;i++){const c=v[i],n=/\d/.test(
 function plausible(v){return VIN_RE.test(v)&&!/[IOQ]/.test(v)&&(v.match(/[A-Z]/g)||[]).length>=2&&(v.match(/\d/g)||[]).length>=3;}
 function candidates(text){const raw=String(text||'').toUpperCase();const out=[];for(const line of raw.split(/\n+/)){const c=line.replace(/[^A-Z0-9]/g,'');if(c.length===17)out.push(c);for(let i=0;i<=c.length-17;i++)out.push(c.slice(i,i+17));}const joined=raw.replace(/[^A-Z0-9]/g,'');for(let i=0;i<=joined.length-17;i++)out.push(joined.slice(i,i+17));return [...new Set(out)].filter(plausible);}
 
+export async function GET(){
+ const configured=Boolean(process.env.GOOGLE_VISION_API_KEY);
+ return NextResponse.json({service:'vin-ocr',provider:'google-vision',configured,version:'V1.66'});
+}
+
 export async function POST(request){
  try{
-  const apiKey=process.env.GOOGLE_CLOUD_VISION_API_KEY;
-  if(!apiKey)return NextResponse.json({error:'VIN photo recognition is being configured. Please enter the VIN manually for now.'},{status:503});
+  const apiKey=process.env.GOOGLE_VISION_API_KEY;
+  if(!apiKey){console.error('VIN OCR configuration missing',{googleVisionApiKeyPresent:false,version:'V1.66'});return NextResponse.json({error:'VIN photo recognition is being configured. Please enter the VIN manually for now.',configured:false,version:'V1.66'},{status:503});}
   const form=await request.formData();const file=form.get('image');
   if(!file||typeof file.arrayBuffer!=='function')return NextResponse.json({error:'VIN photo is required.'},{status:400});
   if(file.size>6*1024*1024)return NextResponse.json({error:'Photo is too large. Please take a closer photo of only the VIN.'},{status:413});
