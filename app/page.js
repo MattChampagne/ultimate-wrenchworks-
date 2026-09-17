@@ -1,11 +1,24 @@
 import ServiceRequestForm from './ServiceRequestForm';
 
 const services = [
-  ['SXS / UTV', 'Engine, transmission, suspension, electrical and general service.'],
-  ['ATV', 'Routine maintenance, engine repair, brakes, drivetrain and more.'],
-  ['Motorcycle / Dirt Bike', 'Engine work, suspension, tuning, maintenance and repairs.'],
-  ['Auto / Light Truck', 'Diagnostics, repairs and maintenance for passenger vehicles.']
+  ['SXS / UTV', 'Engine, transmission, suspension, electrical and general service.', 'sxs'],
+  ['ATV', 'Routine maintenance, engine repair, brakes, drivetrain and more.', 'atv'],
+  ['Motorcycle / Dirt Bike', 'Engine work, suspension, tuning, maintenance and repairs.', 'motorcycle'],
+  ['Auto / Light Truck', 'Diagnostics, repairs and maintenance for passenger vehicles.', 'auto']
 ];
+
+function ServiceSilhouette({ type }) {
+  if (type === 'sxs') {
+    return <svg className="serviceIcon" viewBox="0 0 140 100" aria-hidden="true"><circle cx="34" cy="77" r="16"/><circle cx="108" cy="77" r="16"/><path d="M20 69h8l9-32h14l10-20h36l17 23 10 5 7 24h-15c-3-11-12-19-24-19s-21 8-24 19H52c-3-11-12-19-24-19-3 0-6 1-8 2v-3Zm28-31h18V23H56l-8 15Zm24 0h30L91 23H72v15Z"/></svg>;
+  }
+  if (type === 'atv') {
+    return <svg className="serviceIcon" viewBox="0 0 140 100" aria-hidden="true"><circle cx="32" cy="76" r="17"/><circle cx="108" cy="76" r="17"/><path d="M17 63h19l13-20h31l10 8h22l12 12-8 8c-4-10-13-17-24-17-12 0-22 8-25 19H55c-2-11-12-19-24-19-5 0-10 2-14 4v5Zm45-23 7-16h18l3 7H76l-4 9H62Zm27-17 21-6 2 6-20 7-3-7Z"/></svg>;
+  }
+  if (type === 'motorcycle') {
+    return <svg className="serviceIcon" viewBox="0 0 140 100" aria-hidden="true"><circle cx="31" cy="74" r="18"/><circle cx="109" cy="74" r="18"/><path d="M31 68h27l17-28 10 5-12 20h22l-8-29h-9v-7h25v7H94l11 32h4v11H96l-25-4-8 7H48c-3-8-9-14-17-14Zm31-11-13-19h-9v-7h19l13 18-10 8Zm25-27 14-10 4 5-15 11-3-6Z"/></svg>;
+  }
+  return <svg className="serviceIcon" viewBox="0 0 140 100" aria-hidden="true"><circle cx="34" cy="76" r="14"/><circle cx="107" cy="76" r="14"/><path d="M12 70l7-25 18-7 15-20h43l20 23 14 5 5 24h-13c-3-10-12-17-23-17s-20 7-23 17H48c-3-10-12-17-23-17-5 0-9 1-13 4v-7Zm37-31h50L89 25H58L49 39Z"/></svg>;
+}
 
 function ProcessSilhouette({ type }) {
   if (type === 'request') {
@@ -47,7 +60,7 @@ export default function Home() {
       <section className="section serviceShowcase" id="services">
         <div className="sectionHeading"><p className="kicker">WHAT WE WORK ON</p><h2>POWERSPORTS TO DAILY DRIVERS.</h2><p>Mobile service designed to keep your machines moving without the hassle of hauling them to a shop.</p></div>
         <div className="grid serviceGrid">
-          {services.map(([title, text])=><article className="card serviceCard" key={title}><h3>{title}</h3><p>{text}</p></article>)}
+          {services.map(([title, text, type])=><article className="card serviceCard" key={title}><h3>{title}</h3><p>{text}</p><ServiceSilhouette type={type} /></article>)}
         </div>
       </section>
 
