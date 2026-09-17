@@ -64,9 +64,9 @@ export default function ServiceRequestForm() {
     payload.vin=serviceType==='Auto / Light Truck'?vin:'';
     payload.engineSize=resolvedEngine;
     if(serviceType==='Auto / Light Truck'&&!vinData){setSuccess(false);setStatus('Please enter and decode the 17-character VIN before submitting.');return;}
-    const requiredLabels={name:'Name',phone:'Phone',serviceType:'Equipment category',serviceNeeded:'Service needed',vehicle:'Vehicle',timeframe:'Preferred timeframe',location:'Service location',issue:'Additional details'};
-    const missing=Object.keys(requiredLabels).filter(key=>!String(payload[key]||'').trim());
-    if(missing.length){const first=missing[0];setSuccess(false);setStatus(`Please complete: ${missing.map(key=>requiredLabels[key]).join(', ')}.`);const field=formElement.elements.namedItem(first);if(field&&typeof field.focus==='function'){field.focus();field.scrollIntoView?.({behavior:'smooth',block:'center'});}return;}
+    const requiredRules={name:{label:'Name',min:2},phone:{label:'Phone',min:7},serviceType:{label:'Equipment category',min:1},serviceNeeded:{label:'Service needed',min:2},vehicle:{label:'Vehicle',min:2},timeframe:{label:'Preferred timeframe',min:1},location:{label:'Service location',min:5},issue:{label:'Additional details',min:10}};
+    const missing=Object.keys(requiredRules).filter(key=>String(payload[key]||'').trim().length<requiredRules[key].min);
+    if(missing.length){const first=missing[0];setSuccess(false);setStatus(`Please complete: ${missing.map(key=>requiredRules[key].label).join(', ')}${missing.includes('issue')?' (additional details must be at least 10 characters)':''}.`);const field=formElement.elements.namedItem(first);if(field&&typeof field.focus==='function'){field.focus();field.scrollIntoView?.({behavior:'smooth',block:'center'});}return;}
     let currentTravel=travel;
     if(!currentTravel){currentTravel=await checkTravel(payload.location);if(!currentTravel){setSuccess(false);setStatus('Please verify the service address so we can calculate driving distance.');return;}}
     payload.travelDistanceMiles=currentTravel.miles; payload.travelFee=currentTravel.travelFee??0;
