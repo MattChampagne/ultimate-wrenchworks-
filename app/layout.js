@@ -2,6 +2,7 @@ import './globals.css';
 import './customer-v119.css';
 import './process-v168.css';
 import VinScannerEnhancer from './VinScannerEnhancer';
+import NoSameDayScheduling from './NoSameDayScheduling';
 
 export const metadata = {
   title: 'Ultimate Wrenchworks | Mobile Powersports & Auto Service',
@@ -9,5 +10,5 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  return <html lang="en"><body>{children}<VinScannerEnhancer/></body></html>;
+  return <html lang="en"><body>{children}<VinScannerEnhancer/><NoSameDayScheduling/></body></html>;
 }
