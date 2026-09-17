@@ -1,0 +1,2 @@
+.processGrid>div{position:relative;overflow:hidden;padding-right:120px;min-height:190px}.processGrid>div>b,.processGrid>div>h3,.processGrid>div>p{position:relative;z-index:1}.processIcon{position:absolute;right:16px;top:50%;width:98px;height:98px;transform:translateY(-42%);fill:#15191c;opacity:.13;pointer-events:none}
+@media(max-width:800px){.processGrid>div{padding-right:105px;min-height:170px}.processIcon{right:10px;width:88px;height:88px;opacity:.12}}
