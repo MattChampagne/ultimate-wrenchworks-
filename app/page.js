@@ -7,6 +7,16 @@ const services = [
   ['Auto / Light Truck', 'Diagnostics, repairs and maintenance for passenger vehicles.']
 ];
 
+function ProcessSilhouette({ type }) {
+  if (type === 'request') {
+    return <svg className="processIcon" viewBox="0 0 120 120" aria-hidden="true"><path d="M39 22h12c2-7 16-7 18 0h12v12H39V22Zm-8 8H20v76h80V30H89v14H31V30Zm8 31h42v8H39v-8Zm0 18h32v8H39v-8Z"/></svg>;
+  }
+  if (type === 'quote') {
+    return <svg className="processIcon" viewBox="0 0 120 120" aria-hidden="true"><path d="M27 12h49l21 21v75H27V12Zm49 8v20h20L76 20ZM43 54h38v7H43v-7Zm0 15h38v7H43v-7Zm0 15h23v7H43v-7Z"/><path d="M76 81c-8 0-14 5-14 12s6 12 14 12 14-5 14-12-6-12-14-12Zm3 18h-6v-3c-4-1-6-3-6-6h6c0 1 1 2 3 2s3-1 3-2c0-1-1-2-4-2-5-1-8-3-8-7 0-3 2-6 6-7v-3h6v3c4 1 6 3 6 6h-6c0-1-1-2-3-2s-3 1-3 2 1 2 4 2c5 1 8 3 8 7 0 3-2 6-6 7v3Z"/></svg>;
+  }
+  return <svg className="processIcon" viewBox="0 0 120 120" aria-hidden="true"><path d="M11 45h61v40H11V45Zm61 12h19l18 18v10H72V57ZM27 96a12 12 0 1 0 0-24 12 12 0 0 0 0 24Zm65 0a12 12 0 1 0 0-24 12 12 0 0 0 0 24ZM79 63v12h21L89 63H79Z"/><path d="m39 35 8-8 8 8 15-15 7 7-15 15 8 8-7 7-24-22Z"/></svg>;
+}
+
 export default function Home() {
   return (
     <main className="customerSite">
@@ -52,7 +62,11 @@ export default function Home() {
 
       <section className="processSection" id="process">
         <p className="kicker">HOW IT WORKS</p><h2>FROM REQUEST TO REPAIR.</h2>
-        <div className="processGrid"><div><b>01</b><h3>Request Service</h3><p>Tell us what you have, what it is doing and where it is located.</p></div><div><b>02</b><h3>Review Your Quote</h3><p>We review the request and send your quote for approval.</p></div><div><b>03</b><h3>We Come To You</h3><p>Once scheduled, mobile service is performed at the approved location.</p></div></div>
+        <div className="processGrid">
+          <div><b>01</b><h3>Request Service</h3><p>Tell us what you have, what it is doing and where it is located.</p><ProcessSilhouette type="request" /></div>
+          <div><b>02</b><h3>Review Your Quote</h3><p>We review the request and send your quote for approval.</p><ProcessSilhouette type="quote" /></div>
+          <div><b>03</b><h3>We Come To You</h3><p>Once scheduled, mobile service is performed at the approved location.</p><ProcessSilhouette type="mobile" /></div>
+        </div>
       </section>
 
       <section className="schedule" id="schedule"><div className="scheduleIntro"><p className="kicker">READY TO GET ROLLING?</p><h2>REQUEST MOBILE SERVICE.</h2><p>Send your service details below. We’ll review the request and contact you to confirm scheduling.</p></div><ServiceRequestForm /></section>
