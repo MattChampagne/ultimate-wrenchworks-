@@ -1,5 +1,6 @@
 import './globals.css';
 import './customer-v119.css';
+import './process-v168.css';
 import VinScannerEnhancer from './VinScannerEnhancer';
 
 export const metadata = {
