@@ -13,7 +13,7 @@ export default function Home() {
       <nav className="nav customerNav">
         <a className="brand customerBrand" href="#top"><span>UW</span><b>ULTIMATE<br/>WRENCHWORKS</b></a>
         <div className="navlinks">
-          <a href="#top">Home</a><a href="#services">Services</a><a href="#about">About</a><a href="#process">How It Works</a><a href="#schedule">Contact</a><a className="navcta" href="#schedule">Schedule Service</a>
+          <a href="#services">Services</a><a href="#process">How It Works</a><a className="navcta" href="#schedule">Schedule Service</a>
         </div>
       </nav>
 
@@ -23,7 +23,7 @@ export default function Home() {
             <p className="eyebrow">MOBILE POWERSPORTS & AUTOMOTIVE SERVICE • AUBURN–OPELIKA</p>
             <h1>THE SHOP<br/><em>COMES TO YOU.</em></h1>
             <p className="lead">Mobile repair, diagnostics and maintenance for powersports equipment, passenger vehicles and light trucks — at your home, shop or jobsite.</p>
-            <div className="actions"><a className="primary" href="#schedule">▣&nbsp;&nbsp; Schedule Service →</a><a className="secondary" href="#schedule">Get a Quote →</a></div>
+            <div className="actions"><a className="primary" href="#schedule">▣&nbsp;&nbsp; Schedule Service →</a></div>
           </div>
         </div>
       </section>
