@@ -1,5 +1,5 @@
 const U='https://vxptgfnuxboprwhgcxpd.supabase.co';
-const K=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const K='sb_publishable_Wu0xH_TZ9L5t72BnROPtnw_9eJbG88T';
 const FROM_EMAIL=process.env.RESEND_FROM_EMAIL||'Ultimate Wrenchworks <quotes@ultimatewrenchworks.com>';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function smsNumber(value){const raw=String(value||'').trim(),digits=raw.replace(/\D/g,'');if(digits.length===10)return '+1'+digits;if(digits.length===11&&digits.startsWith('1'))return '+'+digits;if(raw.startsWith('+')&&digits.length>=8&&digits.length<=15)return '+'+digits;return '';}
