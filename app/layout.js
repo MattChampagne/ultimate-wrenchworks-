@@ -1,7 +1,6 @@
 import './globals.css';
 import './customer-v119.css';
 import './process-v168.css';
-import VinScannerEnhancer from './VinScannerEnhancer';
 import NoSameDayScheduling from './NoSameDayScheduling';
 
 export const metadata = {
@@ -10,5 +9,5 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  return <html lang="en"><body>{children}<VinScannerEnhancer/><NoSameDayScheduling/></body></html>;
+  return <html lang="en"><body>{children}<NoSameDayScheduling/></body></html>;
 }
