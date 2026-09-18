@@ -22,11 +22,14 @@ export async function GET(request) {
     const make = clean(row.Make);
     const model = clean(row.Model);
     const year = clean(row.ModelYear);
+    const manufacturer = clean(row.Manufacturer);
+    const vehicleType = clean(row.VehicleType);
+    const complete = Boolean(make && model && year);
 
-    if (!make || !model || !year) {
+    if (!make && !model && !year && !manufacturer) {
       return Response.json({
         ok: false,
-        error: clean(row.ErrorText) || 'This VIN could not be fully decoded. Use year, make and model instead.'
+        error: clean(row.ErrorText) || 'This VIN could not be identified by the VIN data source. Please verify it and use year, make and model if needed.'
       }, { status: 422 });
     }
 
@@ -51,9 +54,12 @@ export async function GET(request) {
       ok: true,
       source: 'NHTSA vPIC',
       vin,
+      complete,
       year,
-      make,
+      make: make || manufacturer,
       model,
+      manufacturer,
+      vehicleType,
       trim,
       series,
       engineSize: displacement ? `${Number(displacement).toFixed(1)}L` : '',
