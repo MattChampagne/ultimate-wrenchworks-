@@ -1,5 +1,5 @@
 const DAV='https://caldav.icloud.com';
-function creds(){const u=process.env.ICLOUD_CALDAV_USERNAME,p=process.env.ICLOUD_CALDAV_APP_PASSWORD;if(!u||!p)throw new Error('Missing iCloud CalDAV credentials');return {u,p};}
+function creds(){const u=String(process.env.ICLOUD_CALDAV_USERNAME||'').trim();const raw=String(process.env.ICLOUD_CALDAV_APP_PASSWORD||'').trim();const p=raw.replace(/[\\s-]+/g,'');if(!u||!p)throw new Error('Missing iCloud CalDAV credentials');return {u,p};}
 function auth(){const {u,p}=creds();return 'Basic '+Buffer.from(u+':'+p).toString('base64');}
 async function dav(url,body,depth='0'){
  let current=url;
