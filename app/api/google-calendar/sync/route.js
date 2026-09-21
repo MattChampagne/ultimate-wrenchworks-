@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 const SB='https://vxptgfnuxboprwhgcxpd.supabase.co';
-export async function POST(){
+async function sync(){
  try{
   const key=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!key)throw new Error('Missing server credential');
   const h={apikey:key,authorization:'Bearer '+key};
@@ -14,3 +14,5 @@ export async function POST(){
   return NextResponse.json({ok:true,busy_blocks:busy.length});
  }catch(e){return NextResponse.json({error:e.message},{status:500});}
 }
+export async function POST(){return sync();}
+export async function GET(){return sync();}
