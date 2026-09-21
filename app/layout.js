@@ -1,7 +1,6 @@
 import './globals.css';
 import './customer-v119.css';
 import './process-v168.css';
-import NoSameDayScheduling from './NoSameDayScheduling';
 
 export const metadata = {
   title: 'Ultimate Wrenchworks | Mobile Powersports & Auto Service',
@@ -9,5 +8,5 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  return <html lang="en"><body>{children}<NoSameDayScheduling/></body></html>;
+  return <html lang="en"><body>{children}</body></html>;
 }
