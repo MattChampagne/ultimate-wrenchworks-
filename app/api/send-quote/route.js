@@ -61,9 +61,18 @@ export async function POST(req){
   const sms=r.sms_consent===true
    ? await sendSms(smsNumber(r.phone),textBody)
    : {ok:false,skipped:true,reason:'Customer has not opted in to SMS'};
+  // Refresh calendar availability whenever a quote is sent. Quote delivery should
+  // still succeed if calendar refresh has a temporary external-service failure.
+  let calendarSynced=false;
+  try{
+   const origin=new URL(req.url).origin;
+   const sr=await fetch(origin+'/api/google-calendar/sync',{method:'POST',cache:'no-store'});
+   calendarSynced=sr.ok;
+   if(!sr.ok)console.error('Calendar refresh before quote completion failed',sr.status);
+  }catch(syncError){console.error('Calendar refresh before quote completion failed',syncError);}
   const now=new Date().toISOString();
   const up=await fetch(`${U}/rest/v1/public_request_quotes_v1?id=eq.${q.id}`,{method:'PATCH',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({status:'sent',sent_at:now,updated_at:now})});
   if(!up.ok) return Response.json({error:'Email sent, but quote status could not be updated'},{status:502});
-  return Response.json({ok:true,emailId:ed.id||null,smsSent:sms.ok,smsId:sms.id||null,smsNote:sms.ok?null:sms.reason||'Text message not sent'});
+  return Response.json({ok:true,emailId:ed.id||null,smsSent:sms.ok,smsId:sms.id||null,smsNote:sms.ok?null:sms.reason||'Text message not sent',calendarSynced});
  }catch(e){console.error(e);return Response.json({error:'Could not send quote'},{status:500});}
 }
