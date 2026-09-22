@@ -246,11 +246,52 @@ export async function POST(req){
       });
     }
 
+    let confirmationEmailSent=false;
+    let confirmationSmsSent=false;
+    let confirmationNote='';
+
+    try{
+      const dateText=new Date(body.scheduled_date+'T12:00:00').toLocaleDateString('en-US',{timeZone:'America/Chicago',weekday:'long',month:'long',day:'numeric',year:'numeric'});
+      const vehicle=requestRow.year_make_model||'your vehicle';
+      const location=requestRow.service_location||'your service location';
+      const emailKey=process.env.RESEND_API_KEY;
+      const fromEmail=process.env.RESEND_FROM_EMAIL||'Ultimate Wrenchworks <quotes@ultimatewrenchworks.com>';
+
+      if(requestRow.email&&emailKey){
+        const html='<div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#17202a"><h1>Ultimate Wrenchworks</h1><p>Hi '+esc(requestRow.customer_name||'')+',</p><p>Your service appointment for <b>'+esc(vehicle)+'</b> has been scheduled.</p><p><b>Date:</b> '+esc(dateText)+'<br><b>Arrival window:</b> '+esc(body.arrival_window)+'<br><b>Service location:</b> '+esc(location)+'</p><p>Thank you for choosing Ultimate Wrenchworks.</p></div>';
+        const er=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:'Bearer '+emailKey,'Content-Type':'application/json'},body:JSON.stringify({from:fromEmail,to:[requestRow.email],subject:'Ultimate Wrenchworks — Appointment Confirmed',html})});
+        confirmationEmailSent=er.ok;
+        if(!er.ok)console.error('Appointment confirmation email failed',er.status,await er.text().catch(()=>''));
+      }
+
+      if(requestRow.sms_consent===true){
+        const raw=String(requestRow.phone||'').trim(),digits=raw.replace(/\D/g,'');
+        const to=digits.length===10?'+1'+digits:(digits.length===11&&digits.startsWith('1')?'+'+digits:(raw.startsWith('+')&&digits.length>=8&&digits.length<=15?'+'+digits:''));
+        const sid=process.env.TWILIO_ACCOUNT_SID,twilioToken=process.env.TWILIO_AUTH_TOKEN,from=process.env.TWILIO_FROM_NUMBER;
+        if(to&&sid&&twilioToken&&from){
+          const authHeader='Basic '+Buffer.from(sid+':'+twilioToken).toString('base64');
+          const smsBody='Ultimate Wrenchworks: Your service appointment is confirmed for '+dateText+', '+body.arrival_window+', at '+location+'. Reply STOP to opt out or HELP for help.';
+          const form=new URLSearchParams({To:to,From:from,Body:smsBody});
+          const sr=await fetch('https://api.twilio.com/2010-04-01/Accounts/'+encodeURIComponent(sid)+'/Messages.json',{method:'POST',headers:{Authorization:authHeader,'Content-Type':'application/x-www-form-urlencoded'},body:form.toString()});
+          confirmationSmsSent=sr.ok;
+          if(!sr.ok)console.error('Appointment confirmation SMS failed',sr.status,await sr.text().catch(()=>''));
+        }
+      }
+
+      if(!confirmationEmailSent&&!confirmationSmsSent)confirmationNote='Appointment was scheduled, but no confirmation message was sent.';
+    }catch(notificationError){
+      console.error('Appointment confirmation failed',notificationError);
+      confirmationNote='Appointment was scheduled, but the confirmation message could not be sent.';
+    }
+
     return Response.json({
       ok:true,
       jobId:job.id,
       calendarSynced,
-      warning
+      warning,
+      confirmationEmailSent,
+      confirmationSmsSent,
+      confirmationNote
     });
   }catch(error){
     console.error('Create job failed:',error?.message||'unknown');
