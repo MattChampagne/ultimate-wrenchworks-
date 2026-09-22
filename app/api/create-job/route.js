@@ -164,6 +164,13 @@ export async function POST(req){
 
     const job=(await created.json())[0];
 
+    let invoiceNumber=job.invoice_number||null;
+    if(!invoiceNumber){
+      const invoiceRes=await db('/rest/v1/rpc/generate_job_invoice_number_v1',{method:'POST',body:JSON.stringify({p_job_id:job.id})});
+      if(invoiceRes.ok)invoiceNumber=await invoiceRes.json();
+      else console.error('Job ID generation failed',invoiceRes.status,await invoiceRes.text().catch(()=>''));
+    }
+
     const requestUpdate=await db('/rest/v1/public_service_requests_v1?id=eq.'+encodeURIComponent(body.request_id),{
       method:'PATCH',
       headers:{Prefer:'return=minimal'},
@@ -198,7 +205,7 @@ export async function POST(req){
         requestRow.service_needed,
         requestRow.phone,
         body.job_notes,
-        'Job '+job.id
+        'Job ID '+(invoiceNumber||job.id)
       ].filter(Boolean).join(' | ')),
       'END:VEVENT',
       'END:VCALENDAR',
@@ -292,6 +299,7 @@ export async function POST(req){
     return Response.json({
       ok:true,
       jobId:job.id,
+      invoiceNumber,
       calendarSynced,
       warning,
       confirmationEmailSent,
