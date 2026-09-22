@@ -139,6 +139,9 @@ export async function POST(req){
       return Response.json({error:'Scheduled date and arrival window are required.'},{status:400});
     }
 
+    const quoteRead=await db('/rest/v1/public_request_quotes_v1?id=eq.'+encodeURIComponent(body.quote_id)+'&select=parts_status,parts_notes');
+    const quoteRow=quoteRead.ok?(await quoteRead.json())[0]||{}:{};
+
     const created=await db('/rest/v1/public_jobs_v1',{
       method:'POST',
       headers:{Prefer:'return=representation'},
@@ -149,6 +152,8 @@ export async function POST(req){
         arrival_window:body.arrival_window,
         status:'scheduled',
         job_notes:body.job_notes||null,
+        parts_status:quoteRow.parts_status||'not_needed',
+        parts_notes:quoteRow.parts_notes||null,
         updated_at:new Date().toISOString()
       })
     });
