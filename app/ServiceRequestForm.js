@@ -14,7 +14,7 @@ const serviceOptions={
 };
 
 const autoServiceDetails={
-  'Maintenance':['Oil & Filter Change','Factory / Mileage-Based Maintenance','Fluid Service','Tune-Up / Preventive Maintenance','Pre-Purchase / General Inspection'],
+  'Routine Maintenance':['Oil & Filter Change','Factory / Mileage-Based Maintenance','Fluid Service','Tune-Up / Preventive Maintenance','Pre-Purchase / General Inspection'],
   'Diagnostics & Electrical':['Check Engine Light / Warning Light','No Start / Hard Start','Battery / Starting / Charging','Electrical Diagnosis','General Diagnostic / Drivability'],
   'Brakes / Tires / Suspension':['Brake Service / Repair','Tire / Wheel Service','Steering / Suspension Repair','Wheel Bearing / Hub','Alignment-Related Inspection'],
   'Engine / Cooling / Fuel':['Engine Performance / Misfire','Cooling System / Overheating','Fuel System Repair','Leak Diagnosis / Repair','Engine Repair'],
