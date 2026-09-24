@@ -75,6 +75,7 @@ export default function ServiceRequestForm() {
     const formElement=event.currentTarget;
     const form=new FormData(formElement);
     const payload=Object.fromEntries(form.entries());
+    payload.serviceType=serviceType;
     payload.vehicle=vehicle;
     payload.serviceNeeded=requestedService;
     payload.vin=(serviceType==='Auto / Light Truck'||isPowersports||isMechanicHelper)?vin:'';
