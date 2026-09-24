@@ -6,7 +6,7 @@ const services = [
   ['SXS / UTV', 'Service and repair for all side-by-sides and utility task vehicles.', 'sxs'],
   ['ATV', 'Maintenance and repairs for all makes and models of ATVs.', 'atv'],
   ['Motorcycle / Dirt Bike', 'Service and repair for on-road and off-road motorcycles.', 'motorcycle'],
-  ['Experienced Mechanic Helper', 'Experienced hands-on mechanical help for your repair or installation project. $55–$100/hr plus the $75 mobile service call; existing travel charges apply beyond 25 miles.', 'helper']
+  ['Experienced Mechanic Helper', 'Experienced hands-on mechanical help for your repair, troubleshooting, assembly, installation, or heavy-component project. Rates range from $50–$100/hr depending on the service, plus the $75 mobile service call.', 'helper']
 ];
 
 function ServiceRender({ type }) { return <span className={`serviceRender serviceRender-${type}`} aria-hidden="true" />; }
