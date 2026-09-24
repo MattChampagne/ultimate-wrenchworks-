@@ -109,6 +109,28 @@ function windowTimes(window){
   return['090000','120000'];
 }
 
+function centralUtc(date,hour){
+  const probe=new Date(date+'T12:00:00Z');
+  const parts=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',timeZoneName:'shortOffset'}).formatToParts(probe);
+  const z=parts.find(p=>p.type==='timeZoneName')?.value||'GMT-5';
+  const m=z.match(/GMT([+-])(\d{1,2})(?::(\d{2}))?/);
+  const off=(m?(m[1]==='-'?-1:1)*(+m[2]*60+(+m[3]||0)):-300);
+  return new Date(Date.UTC(+date.slice(0,4),+date.slice(5,7)-1,+date.slice(8,10),hour,0)-off*60000);
+}
+
+async function slotUnavailable(date,timeframe){
+  const hours={'Morning 9-12':[9,12],'Afternoon 12-4':[12,16],'Evening 6-8':[18,20]}[timeframe];
+  if(!hours)return true;
+  const start=centralUtc(date,hours[0]),end=centralUtc(date,hours[1]);
+  const [br,dr]=await Promise.all([
+    db('/rest/v1/calendar_busy_blocks?starts_at=lt.'+encodeURIComponent(end.toISOString())+'&ends_at=gt.'+encodeURIComponent(start.toISOString())+'&select=starts_at,ends_at'),
+    db('/rest/v1/owner_unavailable_dates?date=eq.'+date+'&select=date')
+  ]);
+  if(!br.ok||!dr.ok)return true;
+  if((await dr.json()).length>0)return true;
+  return (await br.json()).some(b=>new Date(b.starts_at)<end&&new Date(b.ends_at)>start);
+}
+
 async function recordCalendarState(payload){
   const response=await db('/rest/v1/job_calendar_events',{
     method:'POST',
@@ -137,6 +159,10 @@ export async function POST(req){
     const body=await req.json();
     if(!body.request_id||!body.quote_id||!body.scheduled_date||!body.arrival_window){
       return Response.json({error:'Scheduled date and arrival window are required.'},{status:400});
+    }
+
+    if(await slotUnavailable(body.scheduled_date,body.arrival_window)){
+      return Response.json({error:'That date and arrival window are blocked or already in use. Choose another time.'},{status:409});
     }
 
     const quoteRead=await db('/rest/v1/public_request_quotes_v1?id=eq.'+encodeURIComponent(body.quote_id)+'&select=parts_status,parts_notes');
