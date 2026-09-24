@@ -118,6 +118,20 @@ function centralUtc(date,hour){
   return new Date(Date.UTC(+date.slice(0,4),+date.slice(5,7)-1,+date.slice(8,10),hour,0)-off*60000);
 }
 
+async function ultimateCalendarBusy(start,end){
+  const calendar=await calendarUrl();
+  const fmt=d=>d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
+  const body='<?xml version="1.0" encoding="UTF-8"?><c:calendar-query xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav"><d:prop><d:getetag/><c:calendar-data/></d:prop><c:filter><c:comp-filter name="VCALENDAR"><c:comp-filter name="VEVENT"><c:time-range start="'+fmt(start)+'" end="'+fmt(end)+'"/></c:comp-filter></c:comp-filter></c:filter></c:calendar-query>';
+  const r=await dav(calendar,'REPORT',body,{Depth:'1','Content-Type':'application/xml; charset=utf-8'});
+  if(!r.ok)throw Error('calendar conflict check '+r.status);
+  const xml=await r.text();
+  const chunks=xml.split(/BEGIN:VEVENT/i).slice(1);
+  return chunks.some(chunk=>{
+    const event=chunk.split(/END:VEVENT/i)[0]||'';
+    return !/STATUS:CANCELLED/i.test(event)&&!/TRANSP:TRANSPARENT/i.test(event);
+  });
+}
+
 async function slotUnavailable(date,timeframe){
   const hours={'Morning 9-12':[9,12],'Afternoon 12-4':[12,16],'Evening 6-8':[18,20]}[timeframe];
   if(!hours)return true;
@@ -128,7 +142,8 @@ async function slotUnavailable(date,timeframe){
   ]);
   if(!br.ok||!dr.ok)return true;
   if((await dr.json()).length>0)return true;
-  return (await br.json()).some(b=>new Date(b.starts_at)<end&&new Date(b.ends_at)>start);
+  if((await br.json()).some(b=>new Date(b.starts_at)<end&&new Date(b.ends_at)>start))return true;
+  try{return await ultimateCalendarBusy(start,end);}catch(error){console.error('Ultimate Wrenchworks calendar conflict check failed',error?.message||error);return true;}
 }
 
 async function recordCalendarState(payload){
