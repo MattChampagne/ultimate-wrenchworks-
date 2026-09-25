@@ -38,17 +38,18 @@ export async function GET(req){
   }
   if(!/^\d{4}-\d{2}-\d{2}$/.test(date||''))return Response.json({error:'Invalid date'},{status:400});
   const start=centralUtc(date,0),end=centralUtc(date,24);
-  const [br,dr]=await Promise.all([
+  const [br,dr,jr]=await Promise.all([
    fetch(SB+'/rest/v1/calendar_busy_blocks?starts_at=lt.'+encodeURIComponent(end.toISOString())+'&ends_at=gt.'+encodeURIComponent(start.toISOString())+'&select=starts_at,ends_at',{headers:h,cache:'no-store'}),
-   fetch(SB+'/rest/v1/owner_unavailable_dates?unavailable_date=eq.'+date+'&select=unavailable_date',{headers:h,cache:'no-store'})
+   fetch(SB+'/rest/v1/owner_unavailable_dates?unavailable_date=eq.'+date+'&select=unavailable_date',{headers:h,cache:'no-store'}),
+   fetch(SB+'/rest/v1/public_jobs_v1?scheduled_date=eq.'+date+'&select=arrival_window,status',{headers:h,cache:'no-store'})
   ]);
-  if(!br.ok||!dr.ok)return Response.json({error:'Availability unavailable'},{status:502});
-  const blocks=await br.json(),blocked=(await dr.json()).length>0;
+  if(!br.ok||!dr.ok||!jr.ok)return Response.json({error:'Availability unavailable'},{status:502});
+  const blocks=await br.json(),blocked=(await dr.json()).length>0,jobs=await jr.json();
   if(blocked)return Response.json({unavailable:WINDOWS.map(w=>w[0])});
   const unavailable=[];
   for(const w of WINDOWS){
     const s=centralUtc(date,w[1]),e=centralUtc(date,w[2]);
-    let busy=blocks.some(b=>new Date(b.starts_at)<e&&new Date(b.ends_at)>s);
+    let busy=jobs.some(j=>j.status!=='cancelled'&&j.arrival_window===w[0])||blocks.some(b=>new Date(b.starts_at)<e&&new Date(b.ends_at)>s);
     if(!busy){try{busy=await ultimateCalendarBusy(s,e);}catch(error){console.error('Ultimate Wrenchworks live availability check failed',error?.message||error);busy=true;}}
     if(!busy){try{busy=await homesteadCalendarBusy(s,e);}catch(error){console.error('Homestead live availability check failed',error?.message||error);busy=true;}}
     if(busy)unavailable.push(w[0]);
