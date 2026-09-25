@@ -141,12 +141,15 @@ async function slotUnavailable(date,timeframe){
   const hours={'Morning 9-12':[9,12],'Afternoon 12-4':[12,16],'Evening 6-8':[18,20]}[timeframe];
   if(!hours)return true;
   const start=centralUtc(date,hours[0]),end=centralUtc(date,hours[1]);
-  const [br,dr]=await Promise.all([
+  const [br,dr,jr]=await Promise.all([
     db('/rest/v1/calendar_busy_blocks?starts_at=lt.'+encodeURIComponent(end.toISOString())+'&ends_at=gt.'+encodeURIComponent(start.toISOString())+'&select=starts_at,ends_at'),
-    db('/rest/v1/owner_unavailable_dates?unavailable_date=eq.'+date+'&select=unavailable_date')
+    db('/rest/v1/owner_unavailable_dates?unavailable_date=eq.'+date+'&select=unavailable_date'),
+    db('/rest/v1/public_jobs_v1?scheduled_date=eq.'+date+'&select=arrival_window,status')
   ]);
-  if(!br.ok||!dr.ok)return true;
+  if(!br.ok||!dr.ok||!jr.ok)return true;
   if((await dr.json()).length>0)return true;
+  const jobs=await jr.json();
+  if(jobs.some(j=>j.status!=='cancelled'&&j.arrival_window===timeframe))return true;
   if((await br.json()).some(b=>new Date(b.starts_at)<end&&new Date(b.ends_at)>start))return true;
   try{if(await ultimateCalendarBusy(start,end))return true;}catch(error){console.error('Ultimate Wrenchworks calendar conflict check failed',error?.message||error);return true;}try{return await homesteadCalendarBusy(start,end);}catch(error){console.error('Homestead calendar conflict check failed',error?.message||error);return true;}
 }
