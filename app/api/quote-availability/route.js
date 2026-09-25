@@ -19,10 +19,10 @@ export async function GET(req){
    const rangeStart=centralUtc(dates[0],0),rangeEnd=centralUtc(dates[dates.length-1],24);
    const [br,dr]=await Promise.all([
     fetch(SB+'/rest/v1/calendar_busy_blocks?starts_at=lt.'+encodeURIComponent(rangeEnd.toISOString())+'&ends_at=gt.'+encodeURIComponent(rangeStart.toISOString())+'&select=starts_at,ends_at',{headers:h,cache:'no-store'}),
-    fetch(SB+'/rest/v1/owner_unavailable_dates?date=gte.'+dates[0]+'&date=lte.'+dates[dates.length-1]+'&select=date',{headers:h,cache:'no-store'})
+    fetch(SB+'/rest/v1/owner_unavailable_dates?unavailable_date=gte.'+dates[0]+'&unavailable_date=lte.'+dates[dates.length-1]+'&select=unavailable_date',{headers:h,cache:'no-store'})
    ]);
    if(!br.ok||!dr.ok)return Response.json({error:'Availability unavailable'},{status:502});
-   const blocks=await br.json(),blockedDates=new Set((await dr.json()).map(x=>x.date));
+   const blocks=await br.json(),blockedDates=new Set((await dr.json()).map(x=>x.unavailable_date));
    const unavailableDates=dates.filter(d=>blockedDates.has(d)||WINDOWS.every(w=>{const s=centralUtc(d,w[1]),e=centralUtc(d,w[2]);return blocks.some(b=>new Date(b.starts_at)<e&&new Date(b.ends_at)>s)}));
    return Response.json({dates,unavailableDates,availableDates:dates.filter(d=>!unavailableDates.includes(d))});
   }
@@ -30,7 +30,7 @@ export async function GET(req){
   const start=centralUtc(date,0),end=centralUtc(date,24);
   const [br,dr]=await Promise.all([
    fetch(SB+'/rest/v1/calendar_busy_blocks?starts_at=lt.'+encodeURIComponent(end.toISOString())+'&ends_at=gt.'+encodeURIComponent(start.toISOString())+'&select=starts_at,ends_at',{headers:h,cache:'no-store'}),
-   fetch(SB+'/rest/v1/owner_unavailable_dates?date=eq.'+date+'&select=date',{headers:h,cache:'no-store'})
+   fetch(SB+'/rest/v1/owner_unavailable_dates?unavailable_date=eq.'+date+'&select=unavailable_date',{headers:h,cache:'no-store'})
   ]);
   if(!br.ok||!dr.ok)return Response.json({error:'Availability unavailable'},{status:502});
   const blocks=await br.json(),blocked=(await dr.json()).length>0;
