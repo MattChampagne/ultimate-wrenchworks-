@@ -138,7 +138,7 @@ async function slotUnavailable(date,timeframe){
   const start=centralUtc(date,hours[0]),end=centralUtc(date,hours[1]);
   const [br,dr]=await Promise.all([
     db('/rest/v1/calendar_busy_blocks?starts_at=lt.'+encodeURIComponent(end.toISOString())+'&ends_at=gt.'+encodeURIComponent(start.toISOString())+'&select=starts_at,ends_at'),
-    db('/rest/v1/owner_unavailable_dates?date=eq.'+date+'&select=date')
+    db('/rest/v1/owner_unavailable_dates?unavailable_date=eq.'+date+'&select=unavailable_date')
   ]);
   if(!br.ok||!dr.ok)return true;
   if((await dr.json()).length>0)return true;
