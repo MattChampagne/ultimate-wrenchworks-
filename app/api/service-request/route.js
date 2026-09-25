@@ -1,6 +1,6 @@
 const SUPABASE_URL = 'https://vxptgfnuxboprwhgcxpd.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Wu0xH_TZ9L5t72BnROPtnw_9eJbG88T';
-const allowedServiceTypes = new Set(['ATV','SXS / UTV','Motorcycle / Dirt Bike','Auto / Light Truck','Small Engine','Other']);
+const allowedServiceTypes = new Set(['ATV','SXS / UTV','Motorcycle / Dirt Bike','Auto / Light Truck','Small Engine','Experienced Mechanic Helper','Other']);
 const allowedTimeframes = new Set(['Morning 9-12','Afternoon 12-4','Evening 6-8']);
 function clean(value,maxLength){return String(value??'').trim().slice(0,maxLength);}
 function cleanVin(value){const vin=String(value??'').toUpperCase().replace(/[^A-HJ-NPR-Z0-9]/g,'').slice(0,17);return vin.length===17?vin:null;}
