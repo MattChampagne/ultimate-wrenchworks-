@@ -21,8 +21,10 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const destination = String(searchParams.get('address') || '').trim().slice(0, 300);
-    if (destination.length < 5) {
-      return Response.json({ ok: false, error: 'Enter a complete service address.' }, { status: 400 });
+    const hasZip = /\b\d{5}(?:-\d{4})?\b/.test(destination);
+    const hasState = /\b(?:AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY|DC)\b/i.test(destination);
+    if (destination.length < 12 || !hasZip || !hasState) {
+      return Response.json({ ok: false, error: 'Enter the full street address, city, state, and ZIP before calculating distance.' }, { status: 400 });
     }
 
     const [base, target] = await Promise.all([geocode(SERVICE_BASE_ADDRESS), geocode(destination)]);
