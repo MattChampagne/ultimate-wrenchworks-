@@ -70,11 +70,11 @@ export default function ServiceRequestForm() {
   function hasCompleteServiceAddress(address){
     const clean=String(address||'').trim();
     const hasZip=/\b\d{5}(?:-\d{4})?\b/.test(clean);
-    const hasState=/\b(?:AL|Alabama)\b/i.test(clean);
+    const hasState=/\b(?:AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY|DC)\b/i.test(clean);
     return clean.length>=12&&hasZip&&hasState;
   }
 
-  async function checkTravel(address){const clean=String(address||'').trim();if(!hasCompleteServiceAddress(clean)){setTravel(null);setTravelStatus('Enter the full street address, city, Alabama, and ZIP before calculating distance.');return null;}setCheckingTravel(true);setTravelStatus('Calculating driving distance…');try{const response=await fetch(`/api/travel-fee?address=${encodeURIComponent(clean)}`,{cache:'no-store'});const data=await response.json();if(!response.ok||!data.ok)throw new Error(data.error||'Unable to calculate distance.');setTravel(data);setTravelStatus('');return data;}catch(error){setTravel(null);setTravelStatus(error.message||'Unable to calculate distance.');return null;}finally{setCheckingTravel(false);}}
+  async function checkTravel(address){const clean=String(address||'').trim();if(!hasCompleteServiceAddress(clean)){setTravel(null);setTravelStatus('Enter the full street address, city, state, and ZIP before calculating distance.');return null;}setCheckingTravel(true);setTravelStatus('Calculating driving distance…');try{const response=await fetch(`/api/travel-fee?address=${encodeURIComponent(clean)}`,{cache:'no-store'});const data=await response.json();if(!response.ok||!data.ok)throw new Error(data.error||'Unable to calculate distance.');setTravel(data);setTravelStatus('');return data;}catch(error){setTravel(null);setTravelStatus(error.message||'Unable to calculate distance.');return null;}finally{setCheckingTravel(false);}}
 
   async function handleSubmit(event){
     event.preventDefault();
