@@ -17,6 +17,37 @@ async function geocode(address) {
   return { lat: Number(data[0].lat), lon: Number(data[0].lon) };
 }
 
+async function arcgisGeocode({ street, city, state, zip }) {
+  const variants = [
+    `${street}, ${city}, ${state} ${zip}`,
+    `${street.replace(/\bLee\s+Road\b/i, 'Lee Rd')}, ${city}, ${state} ${zip}`,
+    `${street.replace(/\bLee\s+Road\b/i, 'County Road')}, ${city}, ${state} ${zip}`
+  ];
+  for (const singleLine of [...new Set(variants)]) {
+    try {
+      const url = new URL('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates');
+      url.searchParams.set('SingleLine', singleLine);
+      url.searchParams.set('f', 'json');
+      url.searchParams.set('maxLocations', '1');
+      url.searchParams.set('countryCode', 'USA');
+      url.searchParams.set('outFields', 'Match_addr,Addr_type');
+      const response = await fetch(url, {
+        headers: { 'User-Agent': 'UltimateWrenchworks/1.0 service-distance-calculator' },
+        next: { revalidate: 86400 }
+      });
+      if (!response.ok) continue;
+      const data = await response.json();
+      const candidate = data?.candidates?.[0];
+      const lat = Number(candidate?.location?.y);
+      const lon = Number(candidate?.location?.x);
+      if (Number.isFinite(lat) && Number.isFinite(lon) && Number(candidate?.score || 0) >= 75) {
+        return { lat, lon };
+      }
+    } catch {}
+  }
+  return null;
+}
+
 async function censusGeocode({ street, city, state, zip }) {
   try {
     const url = new URL('https://geocoding.geo.census.gov/geocoder/locations/address');
@@ -52,7 +83,9 @@ export async function GET(request) {
       return Response.json({ ok: false, error: 'Enter the full street address, city, state, and ZIP before calculating distance.' }, { status: 400 });
     }
 
-    let target = await censusGeocode({ street, city, state, zip });
+    let target = await arcgisGeocode({ street, city, state, zip });
+
+    if (!target) target = await censusGeocode({ street, city, state, zip });
 
     if (!target) {
       const targetUrl = new URL('https://nominatim.openstreetmap.org/search');
