@@ -10,3 +10,32 @@
 
 /* V1.78.1 — keep Safari/iPhone autofill consistent with the dark customer form */
 .requestForm input:-webkit-autofill,.requestForm input:-webkit-autofill:hover,.requestForm input:-webkit-autofill:focus,.requestForm textarea:-webkit-autofill,.requestForm select:-webkit-autofill{-webkit-text-fill-color:#f4f4f1!important;caret-color:#f4f4f1!important;-webkit-box-shadow:0 0 0 1000px #11161a inset!important;box-shadow:0 0 0 1000px #11161a inset!important;transition:background-color 9999s ease-out 0s}
+
+
+/* Service address refinement */
+.serviceAddressCard{border:1px solid #c9c4bb;border-radius:14px;padding:18px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.serviceAddressHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+.serviceAddressHeader>div{display:flex;flex-direction:column;gap:3px}
+.serviceAddressHeader b{font-size:18px;color:#17202a}
+.serviceAddressHeader span{font-size:13px;color:#666}
+.serviceAddressHeader small{font-weight:800;color:#8a3d00;background:#fff0e4;border:1px solid #ffc79e;border-radius:999px;padding:6px 10px;white-space:nowrap}
+.serviceAddressGrid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(110px,.65fr) minmax(120px,.75fr);gap:12px}
+.serviceAddressStreet{grid-column:1/-1}
+.serviceAddressGrid label{display:flex;flex-direction:column;gap:6px}
+.serviceAddressGrid label span{font-size:13px;font-weight:800;color:#31363a}
+.serviceAddressGrid input,.serviceAddressGrid select{width:100%}
+.serviceTravelResult{margin-top:14px;padding:13px 14px;border-radius:10px;border:1px solid #d9d6cf;background:#f7f7f5;color:#333;display:grid;gap:4px}
+.serviceTravelResult strong{font-size:15px}
+.serviceTravelResult span{font-size:13px;line-height:1.4;color:#666}
+.serviceTravelResult.isReady{border-color:#b9d8bd;background:#f3faf4}
+.serviceTravelResult.hasError{border-color:#e0b6b0;background:#fff7f5}
+.serviceTravelResult .compact{justify-self:start;margin-top:7px;padding:8px 12px;font-size:13px}
+@media(max-width:800px){
+  .serviceAddressCard{padding:15px;border-radius:12px}
+  .serviceAddressHeader{display:block}
+  .serviceAddressHeader small{display:inline-block;margin-top:8px}
+  .serviceAddressGrid{grid-template-columns:1fr 110px}
+  .serviceAddressStreet{grid-column:1/-1}
+  .serviceAddressGrid label:nth-of-type(2){grid-column:1/-1}
+  .serviceTravelResult{padding:12px}
+}
