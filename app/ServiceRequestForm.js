@@ -78,7 +78,7 @@ export default function ServiceRequestForm() {
     return clean.length>=12&&hasZip&&hasState;
   }
 
-  async function checkTravel(address){const clean=String(address||'').trim();if(!hasCompleteServiceAddress(clean)){setTravel(null);setTravelStatus('Enter the full street address, city, state, and ZIP before calculating distance.');return null;}setCheckingTravel(true);setTravelStatus('Calculating driving distance…');try{const response=await fetch(`/api/travel-fee?address=${encodeURIComponent(clean)}`,{cache:'no-store'});const data=await response.json();if(!response.ok||!data.ok)throw new Error(data.error||'Unable to calculate distance.');setTravel(data);setTravelStatus('');return data;}catch(error){setTravel(null);setTravelStatus(error.message||'Unable to calculate distance.');return null;}finally{setCheckingTravel(false);}}
+  async function checkTravel(address){const clean=String(address||'').trim();if(!hasCompleteServiceAddress(clean)){setTravel(null);setTravelStatus('Enter the full street address, city, state, and ZIP before calculating distance.');return null;}setCheckingTravel(true);setTravelStatus('Calculating driving distance…');try{const params=new URLSearchParams({street:street.trim(),city:city.trim(),state:serviceState,zip:zip.trim()});const response=await fetch(`/api/travel-fee?${params.toString()}`,{cache:'no-store'});const data=await response.json();if(!response.ok||!data.ok)throw new Error(data.error||'Unable to calculate distance.');setTravel(data);setTravelStatus('');return data;}catch(error){setTravel(null);setTravelStatus(error.message||'Unable to calculate distance.');return null;}finally{setCheckingTravel(false);}}
 
   async function handleSubmit(event){
     event.preventDefault();
