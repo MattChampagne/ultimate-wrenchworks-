@@ -20,14 +20,33 @@ async function geocode(address) {
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const destination = String(searchParams.get('address') || '').trim().slice(0, 300);
-    const hasZip = /\b\d{5}(?:-\d{4})?\b/.test(destination);
-    const hasState = /\b(?:AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY|DC)\b/i.test(destination);
-    if (destination.length < 12 || !hasZip || !hasState) {
+    const street = String(searchParams.get('street') || '').trim().slice(0, 120);
+    const city = String(searchParams.get('city') || '').trim().slice(0, 80);
+    const state = String(searchParams.get('state') || '').trim().toUpperCase().slice(0, 2);
+    const zip = String(searchParams.get('zip') || '').trim().slice(0, 10);
+    if (street.length < 3 || city.length < 2 || !/^[A-Z]{2}$/.test(state) || !/^\d{5}(?:-\d{4})?$/.test(zip)) {
       return Response.json({ ok: false, error: 'Enter the full street address, city, state, and ZIP before calculating distance.' }, { status: 400 });
     }
 
-    const [base, target] = await Promise.all([geocode(SERVICE_BASE_ADDRESS), geocode(destination)]);
+    const targetUrl = new URL('https://nominatim.openstreetmap.org/search');
+    targetUrl.searchParams.set('format', 'jsonv2');
+    targetUrl.searchParams.set('limit', '1');
+    targetUrl.searchParams.set('countrycodes', 'us');
+    targetUrl.searchParams.set('street', street);
+    targetUrl.searchParams.set('city', city);
+    targetUrl.searchParams.set('state', state);
+    targetUrl.searchParams.set('postalcode', zip);
+
+    const targetResponse = await fetch(targetUrl, {
+      headers: {
+        'User-Agent': 'UltimateWrenchworks/1.0 service-distance-calculator',
+        'Accept-Language': 'en-US,en;q=0.9'
+      },
+      next: { revalidate: 86400 }
+    });
+    const targetData = targetResponse.ok ? await targetResponse.json() : [];
+    const target = Array.isArray(targetData) && targetData[0] ? { lat: Number(targetData[0].lat), lon: Number(targetData[0].lon) } : null;
+    const base = await geocode(SERVICE_BASE_ADDRESS);
     if (!base || !target) {
       return Response.json({ ok: false, error: 'We could not locate that address. Please enter a full street address, city, state, and ZIP.' }, { status: 422 });
     }
